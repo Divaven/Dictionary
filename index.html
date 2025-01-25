@@ -27,6 +27,16 @@
     <div id="dictionaryList" class="list-group"></div>
 </div>
 
-<script type="module" src="./js/controller.js"></script>
+<script type="module">
+    import model from './js/model.js';
+    import view from './js/view.js';
+    import controller from './js/controller.js';
+    import {watchState} from './watch/watchers.js';
+
+    watchState();
+    model.init();
+    controller.init();
+    view.renderDictionaryList(model.state.dictionary);
+</script>
 </body>
 </html>
