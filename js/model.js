@@ -35,8 +35,8 @@ const model = {
         }
     },
 
-    removeWord(word) {
-        this.state.dictionary = this.state.dictionary.filter(item => item.word !== word);
+    removeWord(wordToRemove) {
+        this.state.dictionary = this.state.dictionary.filter(item => item.word !== wordToRemove);
     }
 };
 
