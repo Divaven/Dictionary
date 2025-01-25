@@ -1,71 +1,42 @@
 import model from './model.js';
-import view from './view.js';
-import watchState from '../watch/watchers.js';
 
-const controller = (() => {
+const controller = {
+    init() {
 
-    async function handleTranslate() {
-        const word = view.wordInputEl.value.trim();
-        if (!word) {
-            view.renderError('Введите слово для перевода!');
-            view.setAddButtonState(false);
+    },
+
+    async handleTranslate(inputWord) {
+        model.state.errorMessage = '';
+        if (!inputWord) {
+            model.state.errorMessage = 'Введите слово для перевода!';
             return;
         }
-        view.clearTranslation();
 
         try {
-            const translation = await model.fetchTranslation(word);
-
-            model.state.currentWord = word;
+            const translation = await model.fetchTranslation(inputWord);
+            model.state.currentWord = inputWord;
             model.state.currentTranslation = translation;
-
-            view.setAddButtonState(true);
         } catch (err) {
-            view.renderError(err.message);
-            view.setAddButtonState(false);
+            model.state.errorMessage = err.message;
         }
-    }
+    },
 
-    function handleAdd() {
+    handleAdd() {
         const { currentWord, currentTranslation } = model.state;
-        if (!currentWord || !currentTranslation) return;
-
+        if (!currentWord || !currentTranslation) {
+            model.state.errorMessage = 'Нет данных для добавления!';
+            return;
+        }
         model.addWord(currentWord, currentTranslation);
 
         model.state.currentWord = '';
         model.state.currentTranslation = '';
-        view.wordInputEl.value = '';
-        view.setAddButtonState(false);
-        view.clearTranslation();
-    }
+        model.state.errorMessage = '';
+    },
 
-    function handleRemove(e) {
-        if (!e.target.classList.contains('remove-btn')) return;
-        const wordToRemove = e.target.getAttribute('data-word');
+    handleRemove(wordToRemove) {
         model.removeWord(wordToRemove);
     }
+};
 
-    function initEventListeners() {
-        view.translateBtnEl.addEventListener('click', handleTranslate);
-        view.addToDictionaryBtnEl.addEventListener('click', handleAdd);
-        view.wordInputEl.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                handleTranslate();
-            }
-        });
-        view.dictionaryListEl.addEventListener('click', handleRemove);
-    }
-
-    function init() {
-        model.init();
-        watchState();
-        view.renderDictionaryList(model.state.dictionary);
-        initEventListeners();
-    }
-
-    return { init };
-})();
-
-document.addEventListener('DOMContentLoaded', () => {
-    controller.init();
-});
+export default controller;
